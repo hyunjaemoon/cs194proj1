@@ -1,0 +1,125 @@
+<!doctype html>
+
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Hyun Jae Moon's CS194-26 Project 1</title>
+  <link href="styles/style.css" rel="stylesheet" type="text/css">
+  <style>
+    html {
+      background-color: #e0ffff;
+    }
+
+    h1 {
+      text-align: center;
+      font-family: 'Georgia';
+      font-size: 40px;
+    }
+
+    h2 {
+      text-align: center;
+      font-family: 'Copperplate';
+      font-size: 30px;
+    }
+
+    p {
+      text-align: left;
+      font-family: 'Times New Roman';
+      font-size: 20px;
+      line-height: 2;
+    }
+
+    div {
+      text-align: center;
+    }
+
+    body {
+      width: 1000px;
+      margin: 0 auto;
+      padding: 0 20px 20px 20px;
+    }
+
+    .column {
+      float: left;
+      width: 32%;
+      padding: 5px;
+    }
+
+    /* Clearfix (clear floats) */
+    .row::after {
+      content: "";
+      clear: both;
+      display: table;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Images of the Russian Empire: Colorizing the Prokudin-Gorskii photo collection</h1>
+  <h3 style="text-align: right"> By Hyun Jae Moon </h3>
+
+  <h2> Introduction </h2>
+
+  <p>
+    The goal of this project is to extract the three color channel images (R, G, B),
+    place them on top of each other with an appropriate alignment using both
+    exhaustive and pyramid implementation.
+  </p>
+
+  <h2> Exhaustive Method </h2>
+  <p>
+    For jpg files, which are lot smaller in file size, I've implemented an
+    exhaustive algorithm to detect pixel offsets and align the three color channels
+    appropriately. I would first align green channel to blue channel and find
+    the appropriate pixel offset of the green channel. Then, I would do the same for
+    red channel to blue channel. Finally, I would stack all three channels into
+    one colored image. Here are the results for the jpg files after alignment
+    with their respective offsets.
+  </p>
+
+  <div class="row">
+    <div class="column">
+      <img src="out/cathedral.jpg" alt="Cathedral" style="width:100%">
+      <p style="text-align: center">cathedral.jpg | G:(-1, 1), R:(-1, 7)</p>
+    </div>
+    <div class="column">
+      <img src="out/monastery.jpg" alt="Monastery" style="width:100%">
+      <p style="text-align: center">monastery.jpg | G:(0, -6), R:(1, 9)</p>
+    </div>
+    <div class="column">
+      <img src="out/tobolsk.jpg" alt="tobolsk" style="width:100%">
+      <p style="text-align: center">tobolsk.jpg | G:(2, 3), R:(3, 6)</p>
+    </div>
+  </div>
+
+  <h2> Pyramid Method </h2>
+  <p>
+    The downside of the exhaustive method is that it takes too much time to process
+    large image files such as tiff files. To fasten the process, we must rescale the
+    image to a smaller pixel margins, such that alignment can be processed at a
+    much faster rate. I've continuously rescaled the image by halving per step
+    and check the image size until it is smaller than 65536 (256 * 256). Then,
+    we would perform the exhaustive method on a smaller image, and exponentiate
+    the offsets by the number of times I have halved the images. Then it will
+    produce the correct offset.
+  </p>
+  <div id="banner" style="overflow: hidden;justify-content:space-around;">
+    <div class="">
+      <img src="out/cathedral.jpg">
+      <p style="text-align: center">cathedral.jpg | G:(-1, 1), R:(-1, 7)</p>
+    </div>
+
+    <div class="">
+      <img src="out/monastery.jpg">
+      <p style="text-align: center">monastery.jpg | G:(0, -6), R:(1, 9)</p>
+    </div>
+
+    <div class="">
+      <img src="out/tobolsk.jpg">
+      <p style="text-align: center">tobolsk.jpg | G:(2, 3), R:(3, 6)</p>
+    </div>
+  </div>
+</body>
+
+</html>
