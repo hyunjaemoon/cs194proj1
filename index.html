@@ -52,6 +52,12 @@
       clear: both;
       display: table;
     }
+
+    table,
+    th,
+    td {
+      border: 1px solid black;
+    }
   </style>
 </head>
 
@@ -67,13 +73,30 @@
     exhaustive and pyramid implementation.
   </p>
 
+  <h2> Normalized Cross Correlation (NCC) </h2>
+  <p style="text-align:center;"><img src="NCCformula.png" alt="NCC" style="width:50%"></p>
+  <p>
+    The Nomrmalized Cross Correlation is widely used for checking image similarity, and
+    it checks whether two datas contain a similar pattern of values. To implement the
+    formula above in terms of Python, we would first obtain the mean and standard deviation
+    of the two images we are about to align using np.mean and np.std. Since we can
+    extract the part regarding <br> sqrt(1.0 / (n-1)) from both coefficients, so that we can
+    multiply, np.sum, and then multiply the result by 1.0/(n-1).
+  </p>
+  <p style="font-size: 15px;">
+    Citation:
+    <a href="https://xcdskd.readthedocs.io/en/latest/cross_correlation/cross_correlation_coefficient.html">
+      https://xcdskd.readthedocs.io/en/latest/cross_correlation/cross_correlation_coefficient.html
+    </a>
+  </p>
+
   <h2> Exhaustive Method </h2>
   <p>
     For jpg files, which are lot smaller in file size, I've implemented an
     exhaustive algorithm to detect pixel offsets and align the three color channels
     appropriately. Firstly, I would crop the image by a fixed value of 20px to cut the
     black borders off. Then, the exhuastive algorithm would check in the range of
-    [-15, 15] pixels, and search for the largest Nomralized Correlation.
+    [-15, 15] pixels, and search for the largest Nomralized Cross Correlation.
     I would first align green channel to blue channel and find
     the appropriate pixel offset of the green channel. Then, I would do the same for
     red channel to blue channel. Finally, I would stack all three channels into
@@ -105,9 +128,7 @@
     to remove the black borders. Then I've continuously rescaled the image by half per step
     and proceed 5 times, which would result in 1/32 of the original image size. Then,
     we would perform the exhaustive method on a smaller image, and come back to the greater
-    version to check for the range of [offset * 2 &#177; 1]. Then it will produce the correct offset.
-    I have originally attempted halving the image for 5 steps, but the parameters I
-    mentioned produced a better image result.
+    version to check for the range of [offset * 2 &#177; 1]. Then, it will produce the correct offset.
   </p>
   <div class="row">
     <div class="column">
@@ -160,7 +181,80 @@
       <img src="out/workshop.jpg" alt="Workshop" style="width:100%">
       <p style="text-align: center; font-size: 15px;">workshop.tif | G: (0, 52), R: (-12, 104)</p>
     </div>
+    <div class="column">
+      <img src="out/kurmy.jpg" alt="Kurmy" style="width:100%">
+      <p style="text-align: center; font-size: 15px;">kurmy.tif | G: (-18, 25), R: (-38, 115)</p>
+    </div>
   </div>
+  <div class="row">
+    <div class="column">
+      <img src="out/lugano.jpg" alt="Lugano" style="width:100%">
+      <p style="text-align: center; font-size: 15px;">lugano.tif | G: (7, 55), R: (32, 120)</p>
+    </div>
+    <div class="column">
+      <img src="out/zakat.jpg" alt="Zakat" style="width:100%">
+      <p style="text-align: center; font-size: 15px;">zakat.tif | G: (-41, 75), R: (-68, 114)</p>
+    </div>
+  </div>
+
+  <h2> Alignment Time Spent on Each Image </h2>
+  <p>
+    cathedral.jpg took 1.53 seconds<br>
+    monastery.jpg took 1.61 seconds<br>
+    tobolsk.jpg took 1.55 seconds<br>
+    church.tif took 5.98 seconds<br>
+    emir.tif took 5.66 seconds<br>
+    harvesters.tif took 5.89 seconds<br>
+    icon.tif took 6.06 seconds<br>
+    lady.tif took 5.75 seconds<br>
+    melons.tif took 6.06 seconds<br>
+    onion_church.tif took 5.95 seconds<br>
+    self_portrait.tif took 5.9 seconds<br>
+    three_generations.tif took 6.15 seconds<br>
+    train.tif took 6.1 seconds<br>
+    workshop.tif took 6.13 seconds<br>
+    kurmy.tif took 6.21 seconds<br>
+    lugano.tif took 6.48 seconds<br>
+    zakat.tif took 6.11 seconds<br><br>
+    On average, the exhaustive method on jpg files took 1.56 seconds.<br>
+    On average, the pyramid method on tif files took 6.03 seconds.
+  </p>
+
+  <h2> What is wrong with 'emir.tif'? </h2>
+  <h3 style="text-align:center;"> (Bells & Whistles: Edge Detection) </h3>
+  <p>
+    You probably realized that all my other photos look good except 'emir.tif'. Why is that?
+    The reason why is because each color channels of the image don't necessarily
+    have the same brightness value. In such case, we will use edge detection to
+    consider such situations, and produce a better version. Here is the image produced
+    before adding edge detection.
+  </p>
+  <p style="text-align:center;"><img src="out/emir.jpg" alt="Emir" style="width:50%"></p>
+  <p>
+    As you can see, the red channel of the image is far off to the left. However, with edge
+    detection, this is not going to be an issue at all. Here, I will be utilizing
+    Canny Edge Detector under skimage. It uses a filter based on the derivative
+    of a Gaussian in order to compute the intensity of the gradients. Since skimage.feature.canny
+    produces boolean values, we should multiply the values by 255 to convert into a grey scale.
+    Then, we perform the pyramid implementation to align the image. The edge detection
+    takes some time (around 5 more seconds), but it works like magic.
+  </p>
+  <div class="row">
+    <div class="column">
+      <img src="extra/rededge.jpg" alt="Rededge" style="width:100%">
+      <p style="text-align: center">Red Edge of 'emir.tif'</p>
+    </div>
+    <div class="column">
+      <img src="extra/greenedge.jpg" alt="Greenedge" style="width:100%">
+      <p style="text-align: center">Green Edge of 'emir.tif'</p>
+    </div>
+    <div class="column">
+      <img src="extra/blueedge.jpg" alt="Blueedge" style="width:100%">
+      <p style="text-align: center">Blue Edge of 'emir.tif'</p>
+    </div>
+  </div>
+  <p style="text-align:center;"><img src="extra/emir.jpg" alt="EmirFixed" style="width:50%"></p>
+  <p style="text-align:center;">Combined Results of all three edge channels!</p>
 </body>
 
 </html>
